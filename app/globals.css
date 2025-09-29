@@ -1,0 +1,454 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* 2025/26 sophisticated color palette with logo-matched navy blue */
+  --background: oklch(0.98 0 0); /* Clean off-white */
+  --foreground: oklch(0.18 0.08 235); /* Deeper navy blue to match logo */
+  --card: oklch(1 0 0); /* Pure white */
+  --card-foreground: oklch(0.18 0.08 235);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.08 235);
+  --primary: oklch(0.18 0.08 235); /* Logo-matched navy blue for primary */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.95 0 0); /* Light grey */
+  --secondary-foreground: oklch(0.18 0.08 235);
+  --muted: oklch(0.95 0 0);
+  --muted-foreground: oklch(0.5 0 0); /* Medium grey */
+  --accent: oklch(0.95 0 0);
+  --accent-foreground: oklch(0.18 0.08 235);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.9 0 0); /* Light border */
+  --input: oklch(0.95 0 0);
+  --ring: oklch(0.5 0 0);
+  --chart-1: oklch(0.18 0.08 235);
+  --chart-2: oklch(0.28 0.06 235);
+  --chart-3: oklch(0.38 0.04 235);
+  --chart-4: oklch(0.58 0.02 235);
+  --chart-5: oklch(0.78 0 235);
+  --radius: 0.5rem;
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.18 0.08 235);
+  --sidebar-primary: oklch(0.18 0.08 235);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.95 0 0);
+  --sidebar-accent-foreground: oklch(0.18 0.08 235);
+  --sidebar-border: oklch(0.9 0 0);
+  --sidebar-ring: oklch(0.5 0 0);
+  /* Professional colour palette with British spelling */
+  --colour-primary-blue: oklch(0.5 0.2 240);
+  --colour-secondary-green: oklch(0.6 0.15 150);
+  --colour-accent-purple: oklch(0.55 0.18 280);
+  --colour-warning-orange: oklch(0.65 0.2 60);
+  --colour-success-emerald: oklch(0.6 0.16 160);
+}
+
+.dark {
+  /* Updated dark mode navy to match logo */
+  --background: oklch(0.08 0.04 235); /* Dark navy background */
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.12 0.04 235); /* Dark navy card */
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.12 0.04 235);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.98 0 0);
+  --primary-foreground: oklch(0.08 0.04 235);
+  --secondary: oklch(0.18 0.04 235); /* Navy secondary */
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.18 0.04 235);
+  --muted-foreground: oklch(0.6 0 0);
+  --accent: oklch(0.18 0.04 235);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.18 0.04 235);
+  --input: oklch(0.18 0.04 235);
+  --ring: oklch(0.4 0 0);
+  --chart-1: oklch(0.98 0 0);
+  --chart-2: oklch(0.8 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.4 0 0);
+  --chart-5: oklch(0.2 0 0);
+  --sidebar: oklch(0.08 0.04 235);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.98 0 0);
+  --sidebar-primary-foreground: oklch(0.08 0.04 235);
+  --sidebar-accent: oklch(0.18 0.04 235);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.18 0.04 235);
+  --sidebar-ring: oklch(0.4 0 0);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* 2025/26 Modern Navigation - Inspired by Avencio */
+.modern-nav {
+  background: linear-gradient(135deg, rgb(250, 250, 249) 0%, rgb(255, 251, 235) 100%);
+  backdrop-filter: blur(25px);
+  border-bottom: 1px solid rgb(214, 211, 209);
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 20px rgba(120, 113, 108, 0.15);
+}
+
+/* Dramatic Hero Section - Avencio Style */
+.hero-dramatic {
+  /* Updated hero gradient to use logo-matched navy */
+  background: linear-gradient(rgba(18, 32, 71, 0.4), rgba(18, 32, 71, 0.6)),
+    url("/modern-luxury-property-exterior-with-professional-.jpg") center / cover;
+  min-height: 100vh;
+  position: relative;
+}
+
+.hero-dramatic::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Updated overlay gradient to match logo navy */
+  background: linear-gradient(135deg, rgba(18, 32, 71, 0.8) 0%, rgba(18, 32, 71, 0.4) 100%);
+  pointer-events: none;
+}
+
+.hero-dramatic::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+  animation: float-colours 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes float-colours {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+}
+
+/* Ultra-Modern Typography */
+.hero-title {
+  font-size: clamp(3rem, 8vw, 9rem);
+  font-weight: 200;
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  color: white;
+}
+
+.section-title {
+  font-size: clamp(2.5rem, 6vw, 6rem);
+  font-weight: 200;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+/* 2025/26 Card Design */
+.future-card {
+  background: oklch(1 0 0);
+  border: 1px solid oklch(0.95 0 0);
+  border-radius: 1rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.future-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  /* Updated card accent to match logo navy */
+  background: linear-gradient(90deg, transparent, oklch(0.18 0.08 235), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.future-card:hover {
+  transform: translateY(-10px);
+  /* Updated hover shadow to match logo navy */
+  box-shadow: 0 25px 70px rgba(18, 32, 71, 0.12);
+  border-color: oklch(0.18 0.08 235);
+  scale: 1.02;
+}
+
+/* Modern Button Styles */
+.btn-2025 {
+  /* Updated button background to match logo navy */
+  background: oklch(0.18 0.08 235);
+  color: oklch(0.98 0 0);
+  border: none;
+  border-radius: 0.75rem;
+  padding: 1.25rem 2.5rem;
+  font-weight: 500;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(18, 32, 71, 0.15);
+}
+
+.btn-2025::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-2025:hover {
+  transform: translateY(-3px);
+  /* Updated button hover shadow to match logo navy */
+  box-shadow: 0 15px 40px rgba(18, 32, 71, 0.25);
+  scale: 1.02;
+}
+
+.btn-outline-2025 {
+  background: transparent;
+  /* Updated outline button to match logo navy */
+  color: oklch(0.18 0.08 235);
+  border: 2px solid oklch(0.18 0.08 235);
+  border-radius: 0.75rem;
+  padding: 1.25rem 2.5rem;
+  font-weight: 500;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(18, 32, 71, 0.1);
+}
+
+.btn-outline-2025:hover {
+  background: oklch(0.18 0.08 235);
+  color: oklch(0.98 0 0);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(18, 32, 71, 0.2);
+  scale: 1.02;
+}
+
+/* Sophisticated Animations */
+.fade-in-sequence {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInSequence 0.8s ease-out forwards;
+}
+
+.fade-in-sequence:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.fade-in-sequence:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.fade-in-sequence:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.fade-in-sequence:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+@keyframes fadeInSequence {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modern Grid Layouts */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+/* Professional Stats Section */
+.stats-modern {
+  background: oklch(0.99 0 0);
+  border: 1px solid oklch(0.95 0 0);
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(18, 32, 71, 0.05);
+}
+
+.stats-modern:hover {
+  background: oklch(1 0 0);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(18, 32, 71, 0.1);
+  border-color: oklch(0.18 0.08 235);
+}
+
+/* Clean Footer Design */
+.footer-2025 {
+  background: oklch(0.98 0 0);
+  border-top: 1px solid oklch(0.95 0 0);
+}
+
+/* Adding smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+  /* Adding background color to prevent white over-scroll areas */
+  background-color: oklch(0.08 0.04 235); /* Dark navy background to match header/footer */
+  margin: 0;
+  padding: 0;
+}
+
+/* Adding service card styles for the new services section */
+.service-card-2025 {
+  background: oklch(1 0 0);
+  border: 1px solid oklch(0.95 0 0);
+  border-radius: 1rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.service-card-2025::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, oklch(0.18 0.08 235), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.service-card-2025:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(18, 32, 71, 0.1);
+  border-color: oklch(0.18 0.08 235);
+}
+
+.service-card-2025:hover::before {
+  opacity: 1;
+}
+
+.service-card-colourful {
+  position: relative;
+  overflow: hidden;
+}
+
+.service-card-colourful::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.service-card-colourful:hover::before {
+  left: 100%;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: clamp(2rem, 10vw, 4rem);
+  }
+
+  .section-title {
+    font-size: clamp(1.5rem, 8vw, 3rem);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-weight: 300;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* Adding British English colour gradients and interactive elements */
+.text-gradient-rainbow {
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rainbow-shift 3s ease-in-out infinite;
+}
+
+.text-gradient-blue {
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes rainbow-shift {
+  0%,
+  100% {
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    filter: hue-rotate(45deg);
+  }
+}
+
+/* Enhanced colour transitions for British spelling */
+.transition-colours {
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
