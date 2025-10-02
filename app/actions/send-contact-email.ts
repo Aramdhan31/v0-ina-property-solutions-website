@@ -23,7 +23,7 @@ export async function sendContactEmail(formData: ContactFormData) {
     // 1) Send main template (to site owner or shared inbox)
     const mainRes = await emailjs.send(
       process.env.EMAILJS_SERVICE_ID!,
-      process.env.EMAILJS_TEMPLATE_ID!,
+      process.env.EMAILJS_TEMPLATE_ID_ADMIN!,
       {
         ...commonParams,
         to_email: "info@inaproperty.co.uk",
