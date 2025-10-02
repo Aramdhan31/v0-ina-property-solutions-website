@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Script from "next/script"
-import { sendContactEmail } from "@/app/actions/send-contact-email"
+import emailjs from "@emailjs/browser"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -77,10 +77,15 @@ export default function ContactClient() {
     setIsSubmitting(true)
 
     try {
-      // Send the email via EmailJS using the server action
-      const result = await sendContactEmail(formData)
+      // Send the email via EmailJS using browser SDK
+      const emailRes = await emailjs.sendForm(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_ADMIN!,
+        e.currentTarget as HTMLFormElement,
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
+      )
 
-      if (result?.success) {
+      if (emailRes.status === 200) {
         setSubmitStatus("success")
         setFormData({ name: "", email: "", phone: "", subject: "", message: "" })
         // after submit success reset widget
