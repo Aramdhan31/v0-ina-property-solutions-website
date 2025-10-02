@@ -10,31 +10,54 @@ interface ContactFormData {
 
 export async function sendContactEmail(formData: ContactFormData) {
   try {
-    const emailjs = await import("emailjs-com")
+    const emailjs = await import("@emailjs/nodejs")
 
-    const templateParams = {
+    const commonParams = {
       user_name: formData.name,
       user_email: formData.email,
       user_phone: formData.phone,
       subject: formData.subject,
       message: formData.message,
-      to_email: "info@inaproperty.co.uk",
     }
 
-    const result = await emailjs.default.send(
+    // 1) Send main template (to site owner or shared inbox)
+    const mainRes = await emailjs.send(
       process.env.EMAILJS_SERVICE_ID!,
       process.env.EMAILJS_TEMPLATE_ID!,
-      templateParams,
-      process.env.EMAILJS_PUBLIC_KEY!,
+      {
+        ...commonParams,
+        to_email: "info@inaproperty.co.uk",
+      },
+      {
+        publicKey: process.env.EMAILJS_PUBLIC_KEY!,
+        privateKey: process.env.EMAILJS_PRIVATE_KEY, // optional, if using secret key
+      },
     )
 
-    if (result.status === 200) {
-      return { success: true }
-    } else {
-      return { success: false, error: "Failed to send email" }
+    // 2) Optional: confirmation email back to the user
+    if (process.env.EMAILJS_CONFIRM_TEMPLATE_ID) {
+      await emailjs.send(
+        process.env.EMAILJS_SERVICE_ID!,
+        process.env.EMAILJS_CONFIRM_TEMPLATE_ID!,
+        {
+          ...commonParams,
+          to_email: formData.email,
+        },
+        {
+          publicKey: process.env.EMAILJS_PUBLIC_KEY!,
+          privateKey: process.env.EMAILJS_PRIVATE_KEY,
+        },
+      )
     }
-  } catch (error) {
+
+    // EmailJS Node SDK resolves with `{status: 200, text: 'OK'}` on success
+    if (mainRes.status === 200) {
+      return { success: true }
+    }
+
+    return { success: false, error: mainRes.text ?? "Failed to send email" }
+  } catch (error: any) {
     console.error("EmailJS error:", error)
-    return { success: false, error: "Failed to send email" }
+    return { success: false, error: (error && error.text) || "Failed to send email" }
   }
 }
