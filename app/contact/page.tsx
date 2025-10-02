@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import ContactForm from "./ContactForm"
+import ContactClient from "./contact-client"
 
 export const metadata: Metadata = {
   title: "Contact INA Property Solutions - Professional Property Maintenance London | Get Quote",
@@ -68,10 +68,5 @@ export const metadata: Metadata = {
 }
 
 export default function ContactPage() {
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Contact Us</h1>
-      <ContactForm />
-    </div>
-  )
+  return <ContactClient />
 }
