@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Script from "next/script"
 import { sendContactEmail } from "@/app/actions/send-contact-email"
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useRef } from "react"
 
 // Declare global grecaptcha
 declare global {
@@ -29,67 +30,35 @@ export default function ContactClient() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+  // ---------- Simple Arithmetic CAPTCHA ----------
 
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const [recaptchaError, setRecaptchaError] = useState("")
-  const recaptchaRef = useRef<HTMLDivElement>(null)
-  const widgetIdRef = useRef<number | null>(null)
-  const [recaptchaLoaded, setRecaptchaLoaded] = useState(false)
+  const [scriptLoaded, setScriptLoaded] = useState(false)
 
-  const SITE_KEY = "6LfMB9QrAAAAAIPSn1rGwHJE2ZrsNYgUy6UQUc2L"
+  // previous rendering effect removed; now handled in script onload
+
+  // Script load handled by <Script> tag below
+
+  const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""
 
   const resetRecaptcha = () => {
-    if (window.grecaptcha && widgetIdRef.current !== null) {
-      window.grecaptcha.reset(widgetIdRef.current)
+    if (window.grecaptcha) {
+      window.grecaptcha.reset()
     }
     setRecaptchaToken(null)
     setRecaptchaError("")
   }
 
-  const initializeRecaptcha = () => {
-    if (
-      typeof window !== "undefined" &&
-      window.grecaptcha &&
-      window.grecaptcha.ready &&
-      recaptchaRef.current &&
-      !recaptchaRef.current.hasChildNodes()
-    ) {
-      window.grecaptcha.ready(() => {
-        try {
-          widgetIdRef.current = window.grecaptcha.render(recaptchaRef.current, {
-            sitekey: SITE_KEY,
-            action: "CONTACT_FORM",
-            callback: (token: string) => {
-              setRecaptchaToken(token)
-              setRecaptchaError("")
-            },
-            "expired-callback": () => {
-              setRecaptchaToken(null)
-              setRecaptchaError("reCAPTCHA expired. Please verify again.")
-            },
-            "error-callback": () => {
-              setRecaptchaToken(null)
-              setRecaptchaError("reCAPTCHA error. Please try again.")
-            },
-          })
-        } catch (error) {
-          console.error("reCAPTCHA render error:", error)
-          setRecaptchaError("Failed to load reCAPTCHA. Please refresh the page.")
-        }
-      })
-    } else if (recaptchaLoaded && !window.grecaptcha) {
-      setRecaptchaError("reCAPTCHA failed to load. Please refresh the page.")
-    }
-  }
-
+  // Auto-reset token after 5 minutes
   useEffect(() => {
-    if (recaptchaLoaded) {
+    if (recaptchaToken) {
       const timer = setTimeout(() => {
-        initializeRecaptcha()
-      }, 100)
+        resetRecaptcha()
+      }, 300000) // 5 minutes
       return () => clearTimeout(timer)
     }
-  }, [recaptchaLoaded])
+  }, [recaptchaToken])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -98,47 +67,37 @@ export default function ContactClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!recaptchaToken) {
-      setRecaptchaError("Please complete the reCAPTCHA verification.")
+    const token = window.grecaptcha?.getResponse() || ""
+    if (!token) {
+      setRecaptchaError("Please verify that you're not a robot.")
       return
     }
+    setRecaptchaToken(token)
 
     setIsSubmitting(true)
 
     try {
-      const recaptchaResponse = await fetch("/api/verify-recaptcha", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token: recaptchaToken }),
-      })
-
-      const recaptchaResult = await recaptchaResponse.json()
-
-      if (!recaptchaResult.success) {
-        setRecaptchaError("reCAPTCHA verification failed. Please try again.")
-        resetRecaptcha()
-        return
-      }
-
+      // Send the email via EmailJS using the server action
       const result = await sendContactEmail(formData)
 
-      if (result.success) {
+      if (result?.success) {
         setSubmitStatus("success")
         setFormData({ name: "", email: "", phone: "", subject: "", message: "" })
-        resetRecaptcha()
+        // after submit success reset widget
+        if (window.grecaptcha) {
+          window.grecaptcha.reset()
+        }
+        setRecaptchaToken(null)
       } else {
         setSubmitStatus("error")
         setRecaptchaError("Failed to send message. Please try again.")
-        resetRecaptcha()
+        setRecaptchaToken(null)
       }
     } catch (error) {
       console.error("Form submission error:", error)
       setSubmitStatus("error")
       setRecaptchaError("Failed to send message. Please try again.")
-      resetRecaptcha()
+      setRecaptchaToken(null)
     } finally {
       setIsSubmitting(false)
     }
@@ -146,19 +105,14 @@ export default function ContactClient() {
 
   return (
     <>
+      {/* Google reCAPTCHA v2 script */}
       <Script
-        src="https://www.google.com/recaptcha/enterprise.js"
-        strategy="afterInteractive"
-        onLoad={() => {
-          setTimeout(() => {
-            setRecaptchaLoaded(true)
-          }, 200)
-        }}
-        onError={() => {
-          setRecaptchaError("Failed to load reCAPTCHA. Please check your internet connection.")
-        }}
+        src="https://www.google.com/recaptcha/api.js"
+        async
+        defer
+        onLoad={() => setScriptLoaded(true)}
       />
-
+      {/* Structured Data JSON-LD */}
       <Script
         id="contact-jsonld"
         type="application/ld+json"
@@ -463,14 +417,14 @@ export default function ContactClient() {
               {/* Contact Form - Mobile Optimised */}
               <div className="order-1 lg:order-2">
                 <div className="lg:sticky lg:top-8">
-                  <Card className="shadow-2xl border-0 bg-white overflow-hidden">
+                  <Card className="w-full shadow-2xl border-0 bg-white overflow-hidden">
                     <CardHeader className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 text-white relative overflow-hidden p-4 sm:p-6">
                       <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-white/20 rounded-full -translate-y-12 translate-x-12 sm:-translate-y-16 sm:translate-x-16"></div>
                         <div className="absolute bottom-0 left-0 w-16 h-16 sm:w-24 sm:h-24 bg-white/10 rounded-full translate-y-8 -translate-x-8 sm:translate-y-12 sm:-translate-x-12"></div>
                       </div>
 
-                      <div className="relative z-10 space-y-3 sm:space-y-4">
+                      <div className="relative z-10 space-y-3 sm:space-y-4 text-center flex flex-col items-center">
                         <CardTitle className="text-xl sm:text-2xl md:text-3xl font-light tracking-wide flex items-center gap-2 sm:gap-3">
                           <div className="w-6 h-6 sm:w-8 sm:h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
                             <span className="text-sm sm:text-lg">✉️</span>
@@ -598,37 +552,15 @@ export default function ContactClient() {
                           />
                         </div>
 
-                        <div className="space-y-1 sm:space-y-2">
-                          <label className="block text-xs sm:text-sm font-semibold text-slate-700">
-                            Security Verification <span className="text-red-500">*</span>
-                          </label>
-                          <div className="flex flex-col items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-slate-50 rounded-lg border border-slate-200">
-                            <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <span className="text-white text-xs sm:text-sm">🔒</span>
-                              </div>
-                              <div>
-                                <p className="text-slate-700 font-medium text-xs sm:text-sm">
-                                  Please verify you're human
-                                </p>
-                                <p className="text-slate-500 text-xs">Complete the reCAPTCHA below</p>
-                              </div>
-                            </div>
-                            <div className="w-full flex justify-center">
-                              <div
-                                ref={recaptchaRef}
-                                className="inline-block transform scale-75 sm:scale-100 origin-center"
-                                style={{ minHeight: "78px", minWidth: "304px" }}
-                              ></div>
-                            </div>
-                          </div>
-                          {recaptchaError && (
-                            <p className="text-red-600 text-xs sm:text-sm flex items-center gap-1 sm:gap-2">
-                              <span className="text-red-500">⚠️</span>
-                              {recaptchaError}
-                            </p>
-                          )}
-                        </div>
+                        {/* reCAPTCHA checkbox */}
+                        <div className="g-recaptcha flex justify-center" data-sitekey={SITE_KEY}></div>
+
+                        {recaptchaError && (
+                          <p className="text-red-600 text-xs sm:text-sm flex items-center gap-1 sm:gap-2">
+                            <span className="text-red-500">⚠️</span>
+                            {recaptchaError}
+                          </p>
+                        )}
 
                         <Button
                           type="submit"
