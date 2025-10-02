@@ -22,8 +22,14 @@ export default function ContactForm() {
           e.currentTarget.reset();
         },
         (err) => {
-          console.error("EmailJS error:", err);
-          setStatus("❌ Failed to send message. Please try again.");
+          console.error(
+            "EmailJS error:",
+            err?.status ?? "no-status",
+            err?.text ?? err
+          );
+          setStatus(
+            `❌ Failed to send message. (${err?.text || "Unknown error"})`
+          );
         }
       );
   };
