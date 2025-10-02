@@ -10,23 +10,40 @@ export default function ContactForm() {
     e.preventDefault();
     const form = e.currentTarget;
 
-    try {
-      // 1. Auto-reply to the visitor
-      await emailjs.sendForm(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-        form,
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-      );
+    // DEBUG: log form values and env
+    const fd = new FormData(form);
+    console.log("DEBUG: form data", {
+      user_name: fd.get("user_name"),
+      user_email: fd.get("user_email"),
+      message: fd.get("message"),
+    });
+    console.log("DEBUG: env", {
+      SERVICE: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+      USER_TEMPLATE: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+      ADMIN_TEMPLATE: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_ADMIN,
+      PUBLIC_KEY: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY,
+    });
 
-      // 2. Notification to admin
-      await emailjs.sendForm(
+    try {
+      // 1. Notification to admin
+      const adminRes = await emailjs.sendForm(
         process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
         process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_ADMIN!,
         form,
         process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
       );
+      console.log("DEBUG: admin response", adminRes);
 
+      // 2. Auto-reply to the visitor
+      const userRes = await emailjs.sendForm(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        form,
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+      );
+      console.log("DEBUG: user response", userRes);
+
+      console.log("EmailJS: both templates sent OK");
       setStatus("✅ Message sent successfully!");
       form.reset();
     } catch (err: any) {
