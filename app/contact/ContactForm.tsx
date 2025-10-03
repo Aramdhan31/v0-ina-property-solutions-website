@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import emailjs from "@emailjs/browser";
+// send via API route instead of EmailJS
 
 export default function ContactForm() {
   const [status, setStatus] = useState("");
@@ -10,49 +10,31 @@ export default function ContactForm() {
     e.preventDefault();
     const form = e.currentTarget;
 
-    // DEBUG: log form values and env
     const fd = new FormData(form);
-    console.log("DEBUG: form data", {
-      user_name: fd.get("user_name"),
-      user_email: fd.get("user_email"),
-      message: fd.get("message"),
-    });
-    console.log("DEBUG: env", {
-      SERVICE: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
-      USER_TEMPLATE: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
-      ADMIN_TEMPLATE: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_ADMIN,
-      PUBLIC_KEY: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY,
-    });
+    console.log("DEBUG: form data", Object.fromEntries(fd.entries()));
 
     try {
-      // 1. Notification to admin
-      const adminRes = await emailjs.sendForm(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_ADMIN!,
-        form,
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-      );
-      console.log("DEBUG: admin response", adminRes);
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fd.get("name"),
+          email: fd.get("email"),
+          message: fd.get("message"),
+        }),
+      });
 
-      // 2. Auto-reply to the visitor
-      const userRes = await emailjs.sendForm(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-        form,
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-      );
-      console.log("DEBUG: user response", userRes);
+      const data = await res.json();
+      console.log("DEBUG: /api/contact response", data);
 
-      console.log("EmailJS: both templates sent OK");
-      setStatus("✅ Message sent successfully!");
-      form.reset();
+      if (data.success) {
+        setStatus("✅ Message sent! You’ll get a confirmation email soon.");
+        form.reset();
+      } else {
+        setStatus("❌ Error sending message: " + data.error);
+      }
     } catch (err: any) {
-      console.error(
-        "EmailJS error:",
-        err?.status ?? "no-status",
-        err?.text ?? err
-      );
-      setStatus("❌ Failed to send message. Please try again.");
+      setStatus("❌ Network error: " + err.message);
     }
   };
 
@@ -60,14 +42,14 @@ export default function ContactForm() {
     <form onSubmit={sendEmail} className="space-y-4 max-w-md mx-auto">
       <input
         type="text"
-        name="user_name"
+        name="name"
         placeholder="Your Name"
         required
         className="w-full border p-2 rounded"
       />
       <input
         type="email"
-        name="user_email"
+        name="email"
         placeholder="Your Email"
         required
         className="w-full border p-2 rounded"
