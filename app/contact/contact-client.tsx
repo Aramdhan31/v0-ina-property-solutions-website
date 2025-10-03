@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Script from "next/script"
-import emailjs from "@emailjs/browser"
+// emailjs removed; using internal API
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -77,15 +77,19 @@ export default function ContactClient() {
     setIsSubmitting(true)
 
     try {
-      // Send the email via EmailJS using browser SDK
-      const emailRes = await emailjs.sendForm(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_ADMIN!,
-        e.currentTarget as HTMLFormElement,
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
-      )
+      const apiRes = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
+      })
 
-      if (emailRes.status === 200) {
+      const data = await apiRes.json()
+
+      if (data.success) {
         setSubmitStatus("success")
         setFormData({ name: "", email: "", phone: "", subject: "", message: "" })
         // after submit success reset widget
