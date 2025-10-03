@@ -15,21 +15,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "missing-fields" }, { status: 400 });
     }
 
-    // 1. Admin notification
+    // 1. Auto-reply to visitor
     await resend.emails.send({
-      from: "Ina Property Solutions <info@inaproperty.co.uk>",
-      to: "info@inaproperty.co.uk",
-      reply_to: email,
-      subject: "New Contact Form Submission",
-      html: `<h2>New Contact Form Submission</h2>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Message:</strong><br>${message}</p>`,
-    });
-
-    // 2. Auto-reply to visitor
-    await resend.emails.send({
-      from: "Ina Property Solutions <info@inaproperty.co.uk>",
+      from: "Ina Property Solutions <noreply@inaproperty.co.uk>",
       to: email,
       subject: "Thank you for contacting Ina Property Solutions",
       html: `<div style="font-family: Arial, sans-serif; color: #333; max-width: 600px;">
@@ -40,6 +28,18 @@ export async function POST(req: NextRequest) {
               <br>
               <img src="https://inaproperty.co.uk/ina-logo-corrected.png" alt="INA Property Solutions" style="height:80px;">
             </div>`,
+    });
+
+    // 2. Notification to admin
+    await resend.emails.send({
+      from: "Ina Property Solutions <noreply@inaproperty.co.uk>",
+      to: "info@inaproperty.co.uk",
+      reply_to: email,
+      subject: "New Contact Form Submission",
+      html: `<h2>New Contact Form Submission</h2>
+              <p><strong>Name:</strong> ${name}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Message:</strong><br>${message}</p>`,
     });
 
     return NextResponse.json({ success: true });
