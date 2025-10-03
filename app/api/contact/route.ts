@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { name, email, message } = await req.json();
+    const { name, email, message, phone } = await req.json();
 
     if (!name || !email || !message) {
       return NextResponse.json({ success: false, error: "missing-fields" }, { status: 400 });
@@ -70,14 +70,33 @@ export async function POST(req: NextRequest) {
 
     // 2. Notification to admin
     await resend.emails.send({
-      from: "Ina Property Solutions <noreply@inaproperty.co.uk>",
+      from: "Ina Property Solutions <info@inaproperty.co.uk>",
       to: "info@inaproperty.co.uk",
       reply_to: email,
       subject: "New Contact Form Submission",
-      html: `<h2>New Contact Form Submission</h2>
-              <p><strong>Name:</strong> ${name}</p>
-              <p><strong>Email:</strong> ${email}</p>
-              <p><strong>Message:</strong><br>${message}</p>`,
+      html: `<!DOCTYPE html>
+      <html lang="en">
+      <head><meta charset="UTF-8" /><title>New Contact Form Submission</title></head>
+      <body style="font-family: Arial, sans-serif; background:#f9f9f9; margin:0; padding:0;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:20px;">
+          <tr><td align="center">
+            <table width="600" cellpadding="20" cellspacing="0" border="0" style="background:#ffffff; border:1px solid #ddd; border-radius:6px; text-align:left;">
+              <tr><td>
+                <h2 style="margin-top:0; color:#333;">📩 New Contact Form Submission</h2>
+                <p style="font-size:15px; margin-bottom:15px;">A new message has been submitted through the website form:</p>
+                <table cellpadding="6" cellspacing="0" border="0" width="100%" style="font-size:14px; border-collapse:collapse;">
+                  <tr><td style="font-weight:bold; width:120px;">Name:</td><td>${name}</td></tr>
+                  <tr><td style="font-weight:bold;">Email:</td><td>${email}</td></tr>
+                  <tr><td style="font-weight:bold;">Phone:</td><td>${phone ?? "N/A"}</td></tr>
+                  <tr><td style="font-weight:bold;">Message:</td><td>${message}</td></tr>
+                </table>
+                <p style="margin-top:20px; font-size:13px; color:#777;">This notification was sent automatically by the INA Property Solutions website.</p>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </body>
+      </html>`,
     });
 
     return NextResponse.json({ success: true });
