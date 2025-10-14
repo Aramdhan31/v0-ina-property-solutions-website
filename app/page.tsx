@@ -206,7 +206,7 @@ export default function HomePage() {
                     </div>
                     <div>
                       <div className="font-semibold text-navy-900 text-base sm:text-base">Industry Recognition</div>
-                      <div className="text-navy-600 font-light text-sm">Award-winning property services</div>
+                      <div className="text-navy-600 font-light text-sm">Trusted property services</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
