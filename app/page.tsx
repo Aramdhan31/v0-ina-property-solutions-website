@@ -199,26 +199,7 @@ export default function HomePage() {
                   complex technical services including plumbing, electrical work, and major refurbishment projects. We
                   pride ourselves on our commitment to quality, reliability, and customer satisfaction.
                 </p>
-                <div className="pt-6 sm:pt-6">
-                  <div className="flex items-center gap-4 mb-6 sm:mb-4">
-                    <div className="w-12 sm:w-12 h-12 sm:h-12 bg-slate-800 rounded-lg flex items-center justify-center">
-                      <span className="text-white text-lg sm:text-lg">🏆</span>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-navy-900 text-base sm:text-base">Industry Recognition</div>
-                      <div className="text-navy-600 font-light text-sm">Trusted property services</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 sm:w-12 h-12 sm:h-12 bg-slate-800 rounded-lg flex items-center justify-center">
-                      <span className="text-white text-lg sm:text-lg">🛡️</span>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-navy-900 text-base sm:text-base">Fully Certified</div>
-                      <div className="text-navy-600 font-light text-sm">Licensed, insured & compliant</div>
-                    </div>
-                  </div>
-                </div>
+                {/* Removed feature badges */}
               </div>
             </div>
             <div className="relative">
