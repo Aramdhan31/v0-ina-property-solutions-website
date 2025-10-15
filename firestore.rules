@@ -1,0 +1,160 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin';
+    }
+
+    function isZoneAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'zone_admin';
+    }
+
+    function isUniversityAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'university_admin';
+    }
+
+    function isIndividualUser() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'individual';
+    }
+
+    // CRITICAL: Allow server-side API access to request collections
+    match /universityRequests/{document} {
+      allow read, write: if true; // Allow anyone (including server-side APIs)
+    }
+
+    match /individualRequests/{document} {
+      allow read, write: if true; // Allow anyone (including server-side APIs)
+    }
+
+    match /adminAccessRequests/{document} {
+      allow read, write: if true; // Allow anyone (including server-side APIs)
+    }
+
+    match /members/{document} {
+      allow read, write: if true; // Allow anyone (including server-side APIs)
+    }
+
+    // Users collection - authenticated users only
+    match /users/{userId} {
+      allow read, write: if (isAuthenticated() && request.auth.uid == userId) || 
+                         isSuperAdmin() ||
+                         (isZoneAdmin() && resource.data.zone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.zone);
+    }
+
+    // Universities collection - university admins and super admins
+    match /universities/{universityId} {
+      allow read, write: if (isAuthenticated() && request.auth.uid == universityId) ||
+                         isSuperAdmin() ||
+                         (isZoneAdmin() && resource.data.zone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.zone) ||
+                         (isUniversityAdmin() && resource.data.adminId == request.auth.uid);
+    }
+
+    // Individual users collection - individual users and admins
+    match /individualUsers/{individualId} {
+      allow read, write: if (isAuthenticated() && request.auth.uid == individualId) ||
+                         isSuperAdmin() ||
+                         (isZoneAdmin() && resource.data.zone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.zone) ||
+                         (isIndividualUser() && resource.data.userId == request.auth.uid);
+    }
+
+    // Players collection - admin only
+    match /players/{playerId} {
+      allow read, write: if isSuperAdmin() || isZoneAdmin();
+    }
+
+    // University applications/requests
+    match /universityApplications/{document} {
+      allow read, write: if isAuthenticated() || true; // Allow server-side API access
+    }
+
+    // Individual user applications/requests
+    match /individualApplications/{document} {
+      allow read, write: if isAuthenticated() || true; // Allow server-side API access
+    }
+
+    // Account verification requests
+    match /verificationRequests/{document} {
+      allow read, write: if isAuthenticated() || true; // Allow server-side API access
+    }
+
+    // Email verification tokens
+    match /emailVerificationTokens/{document} {
+      allow read, write: if isAuthenticated() || true; // Allow server-side API access
+    }
+
+    // Password reset tokens
+    match /passwordResetTokens/{document} {
+      allow read, write: if isAuthenticated() || true; // Allow server-side API access
+    }
+
+    // User profiles (extended user data)
+    match /userProfiles/{profileId} {
+      allow read, write: if (isAuthenticated() && request.auth.uid == profileId) ||
+                         isSuperAdmin() ||
+                         (isZoneAdmin() && resource.data.zone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.zone);
+    }
+
+    // University profiles (extended university data)
+    match /universityProfiles/{profileId} {
+      allow read, write: if (isAuthenticated() && request.auth.uid == profileId) ||
+                         isSuperAdmin() ||
+                         (isZoneAdmin() && resource.data.zone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.zone) ||
+                         (isUniversityAdmin() && resource.data.adminId == request.auth.uid);
+    }
+
+    // Individual user profiles (extended individual data)
+    match /individualProfiles/{profileId} {
+      allow read, write: if (isAuthenticated() && request.auth.uid == profileId) ||
+                         isSuperAdmin() ||
+                         (isZoneAdmin() && resource.data.zone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.zone) ||
+                         (isIndividualUser() && resource.data.userId == request.auth.uid);
+    }
+
+    // Test collection for API testing
+    match /test/{document} {
+      allow read, write: if true; // Allow server-side API access
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read, write: if isAuthenticated() && 
+                         (request.auth.uid == resource.data.userId ||
+                          isSuperAdmin() ||
+                          isZoneAdmin());
+    }
+
+    // Activity logs (admin only)
+    match /activityLogs/{logId} {
+      allow read, write: if isSuperAdmin() || isZoneAdmin();
+    }
+
+    // System settings (super admin only)
+    match /systemSettings/{settingId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    // Zone-specific data
+    match /zones/{zoneId} {
+      allow read, write: if isSuperAdmin() ||
+                         (isZoneAdmin() && resource.data.zoneId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.zone);
+    }
+
+    // Allow authenticated users to read/write other collections
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
